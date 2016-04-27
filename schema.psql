@@ -1,0 +1,740 @@
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: drill; Type: SCHEMA; Schema: -; Owner: acd
+--
+
+CREATE SCHEMA drill;
+
+
+ALTER SCHEMA drill OWNER TO acd;
+
+--
+-- Name: parrot; Type: SCHEMA; Schema: -; Owner: acd
+--
+
+CREATE SCHEMA parrot;
+
+
+ALTER SCHEMA parrot OWNER TO acd;
+
+--
+-- Name: trades; Type: SCHEMA; Schema: -; Owner: acd
+--
+
+CREATE SCHEMA trades;
+
+
+ALTER SCHEMA trades OWNER TO acd;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = drill, pg_catalog;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: notes; Type: TABLE; Schema: drill; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE notes (
+    ts timestamp without time zone DEFAULT now(),
+    frm text,
+    subject text,
+    attachments text,
+    keywords text,
+    content text,
+    recv timestamp without time zone
+);
+
+
+ALTER TABLE notes OWNER TO acd;
+
+SET search_path = parrot, pg_catalog;
+
+--
+-- Name: bestbuy_price; Type: TABLE; Schema: parrot; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE bestbuy_price (
+    ts_old timestamp without time zone DEFAULT now(),
+    name text,
+    sku text,
+    regularprice numeric,
+    saleprice numeric,
+    json jsonb,
+    ts timestamp without time zone DEFAULT date_trunc('day'::text, now())
+);
+
+
+ALTER TABLE bestbuy_price OWNER TO acd;
+
+--
+-- Name: bestbuy_stock; Type: TABLE; Schema: parrot; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE bestbuy_stock (
+    ts_old timestamp without time zone DEFAULT now(),
+    sku text,
+    zip text,
+    stock text,
+    stock_raw text,
+    storename text,
+    availdate text,
+    ts timestamp without time zone DEFAULT date_trunc('day'::text, now())
+);
+
+
+ALTER TABLE bestbuy_stock OWNER TO acd;
+
+--
+-- Name: parrot_stock; Type: VIEW; Schema: parrot; Owner: acd
+--
+
+CREATE VIEW parrot_stock AS
+ SELECT (date_trunc('day'::text, p.ts))::date AS dte,
+    s.sku,
+    s.zip,
+    p.name,
+    p.saleprice,
+    p.regularprice,
+    s.storename,
+    s.availdate
+   FROM bestbuy_stock s,
+    bestbuy_price p
+  WHERE (((s.sku = p.sku) AND (p.sku = ANY (ARRAY['9928358'::text, '4419900'::text, '4419800'::text, '8796018'::text, '4420101'::text, '7589008'::text, '9882135'::text, '4420000'::text]))) AND (p.ts = s.ts))
+  ORDER BY (date_trunc('day'::text, p.ts))::date, s.sku, s.storename, s.zip;
+
+
+ALTER TABLE parrot_stock OWNER TO acd;
+
+--
+-- Name: target_stock; Type: TABLE; Schema: parrot; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE target_stock (
+    ts_old timestamp without time zone DEFAULT now(),
+    ts timestamp without time zone DEFAULT date_trunc('day'::text, now()),
+    sku text,
+    storename text,
+    onhandquantity numeric
+);
+
+
+ALTER TABLE target_stock OWNER TO acd;
+
+--
+-- Name: test; Type: TABLE; Schema: parrot; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE test (
+    a text,
+    ts timestamp without time zone DEFAULT date_trunc('day'::text, now())
+);
+
+
+ALTER TABLE test OWNER TO acd;
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: df_current; Type: TABLE; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE df_current (
+    "Application Id" text,
+    "Preceding Id" text,
+    "Superceding Id" text,
+    "Matched CSI Application Number" text,
+    "Utility" text,
+    "Service City" text,
+    "Service Zip" double precision,
+    "Service County" text,
+    "Technology Type" text,
+    "System Size DC" double precision,
+    "System Size AC" double precision,
+    "Tilt" text,
+    "Azimuth" text,
+    "Mounting Method" text,
+    "Tracking" text,
+    "Customer Sector" text,
+    "App Received Date" text,
+    "App Complete Date" text,
+    "App Approved Date" text,
+    "Decommissioned Date" text,
+    "Self Installer" text,
+    "Installer Name" text,
+    "Installer Phone" text,
+    "Installer City" text,
+    "Installer State" text,
+    "Installer Zip" double precision,
+    "Third Party Owned" text,
+    "Third Party Owned Type" text,
+    "Third Party Name" text,
+    "Pace Financed" text,
+    "Pace Financier" text,
+    "Electric Vehicle" text,
+    "Electric Vehicle Count" double precision,
+    "System Output Monitoring" text,
+    "System Output Reports To Vendor?" text,
+    "System Output Monitoring Provider" text,
+    "Total System Cost" double precision,
+    "Itc Cost Basis" double precision,
+    "Application Status" text,
+    "Project is VNEM, NEM-V, NEM-Agg?" text,
+    "VNEM, NEM-V, NEM-Agg" text,
+    "Cost/Watt" double precision,
+    "Module Model 1" text,
+    "Module Manufacturer 1" text,
+    "Module Quantity 1" double precision,
+    "Module Model 2" text,
+    "Module Manufacturer 2" text,
+    "Module Quantity 2" double precision,
+    "Module Model 3" text,
+    "Module Manufacturer 3" text,
+    "Module Quantity 3" double precision,
+    "Module Model 4" text,
+    "Module Manufacturer 4" text,
+    "Module Quantity 4" double precision,
+    "Module Model 5" text,
+    "Module Manufacturer 5" text,
+    "Module Quantity 5" double precision,
+    "Module Model 6" text,
+    "Module Manufacturer 6" text,
+    "Module Quantity 6" double precision,
+    "Module Model 7" text,
+    "Module Manufacturer 7" text,
+    "Module Quantity 7" double precision,
+    "Module Model 8" text,
+    "Module Manufacturer 8" text,
+    "Module Quantity 8" double precision,
+    "Module Model 9" text,
+    "Module Manufacturer 9" text,
+    "Module Quantity 9" double precision,
+    "Module Model 10" text,
+    "Module Manufacturer 10" text,
+    "Module Quantity 10" double precision,
+    "Inverter Model 1" text,
+    "Inverter Manufacturer 1" text,
+    "Inverter Quantity 1" double precision,
+    "Inverter Model 2" text,
+    "Inverter Manufacturer 2" text,
+    "Inverter Quantity 2" double precision,
+    "Inverter Model 3" text,
+    "Inverter Manufacturer 3" text,
+    "Inverter Quantity 3" double precision,
+    "Inverter Model 4" text,
+    "Inverter Manufacturer 4" text,
+    "Inverter Quantity 4" double precision,
+    "Inverter Model 5" text,
+    "Inverter Manufacturer 5" text,
+    "Inverter Quantity 5" double precision,
+    "Inverter Model 6" text,
+    "Inverter Manufacturer 6" text,
+    "Inverter Quantity 6" double precision,
+    "Inverter Model 7" text,
+    "Inverter Manufacturer 7" text,
+    "Inverter Quantity 7" double precision,
+    "Inverter Model 8" text,
+    "Inverter Manufacturer 8" text,
+    "Inverter Quantity 8" double precision,
+    "Inverter Model 9" text,
+    "Inverter Manufacturer 9" text,
+    "Inverter Quantity 9" double precision,
+    tmp timestamp without time zone,
+    year double precision,
+    month double precision,
+    my_date timestamp without time zone
+);
+
+
+ALTER TABLE df_current OWNER TO acd;
+
+--
+-- Name: df_current_new; Type: TABLE; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE df_current_new (
+    "Application Id" text,
+    "Preceding Id" text,
+    "Superceding Id" text,
+    "Matched CSI Application Number" text,
+    "Utility" text,
+    "Service City" text,
+    "Service Zip" double precision,
+    "Service County" text,
+    "Technology Type" text,
+    "System Size DC" double precision,
+    "System Size AC" double precision,
+    "Tilt" text,
+    "Azimuth" text,
+    "Mounting Method" text,
+    "Tracking" text,
+    "Customer Sector" text,
+    "App Received Date" text,
+    "App Complete Date" text,
+    "App Approved Date" text,
+    "Decommissioned Date" text,
+    "Self Installer" text,
+    "Installer Name" text,
+    "Installer Phone" text,
+    "Installer City" text,
+    "Installer State" text,
+    "Installer Zip" double precision,
+    "Third Party Owned" text,
+    "Third Party Owned Type" text,
+    "Third Party Name" text,
+    "Pace Financed" text,
+    "Pace Financier" text,
+    "Electric Vehicle" text,
+    "Electric Vehicle Count" double precision,
+    "System Output Monitoring" text,
+    "System Output Reports To Vendor?" text,
+    "System Output Monitoring Provider" text,
+    "Total System Cost" double precision,
+    "Itc Cost Basis" double precision,
+    "Application Status" text,
+    "Project is VNEM, NEM-V, NEM-Agg?" text,
+    "VNEM, NEM-V, NEM-Agg" text,
+    "Cost/Watt" double precision,
+    "Module Model 1" text,
+    "Module Manufacturer 1" text,
+    "Module Quantity 1" double precision,
+    "Module Model 2" text,
+    "Module Manufacturer 2" text,
+    "Module Quantity 2" double precision,
+    "Module Model 3" text,
+    "Module Manufacturer 3" text,
+    "Module Quantity 3" double precision,
+    "Module Model 4" text,
+    "Module Manufacturer 4" text,
+    "Module Quantity 4" double precision,
+    "Module Model 5" text,
+    "Module Manufacturer 5" text,
+    "Module Quantity 5" double precision,
+    "Module Model 6" text,
+    "Module Manufacturer 6" text,
+    "Module Quantity 6" double precision,
+    "Module Model 7" text,
+    "Module Manufacturer 7" text,
+    "Module Quantity 7" double precision,
+    "Module Model 8" text,
+    "Module Manufacturer 8" text,
+    "Module Quantity 8" double precision,
+    "Module Model 9" text,
+    "Module Manufacturer 9" text,
+    "Module Quantity 9" double precision,
+    "Module Model 10" text,
+    "Module Manufacturer 10" text,
+    "Module Quantity 10" double precision,
+    "Inverter Model 1" text,
+    "Inverter Manufacturer 1" text,
+    "Inverter Quantity 1" double precision,
+    "Inverter Model 2" text,
+    "Inverter Manufacturer 2" text,
+    "Inverter Quantity 2" double precision,
+    "Inverter Model 3" text,
+    "Inverter Manufacturer 3" text,
+    "Inverter Quantity 3" double precision,
+    "Inverter Model 4" text,
+    "Inverter Manufacturer 4" text,
+    "Inverter Quantity 4" double precision,
+    "Inverter Model 5" text,
+    "Inverter Manufacturer 5" text,
+    "Inverter Quantity 5" double precision,
+    "Inverter Model 6" text,
+    "Inverter Manufacturer 6" text,
+    "Inverter Quantity 6" double precision,
+    "Inverter Model 7" text,
+    "Inverter Manufacturer 7" text,
+    "Inverter Quantity 7" double precision,
+    "Inverter Model 8" text,
+    "Inverter Manufacturer 8" text,
+    "Inverter Quantity 8" double precision,
+    "Inverter Model 9" text,
+    "Inverter Manufacturer 9" text,
+    "Inverter Quantity 9" double precision
+);
+
+
+ALTER TABLE df_current_new OWNER TO acd;
+
+--
+-- Name: df_current_old; Type: TABLE; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE df_current_old (
+    "Application Id" text,
+    "Preceding Id" text,
+    "Superceding Id" text,
+    "Matched CSI Application Number" text,
+    "Utility" text,
+    "Service City" text,
+    "Service Zip" double precision,
+    "Service County" text,
+    "Technology Type" text,
+    "System Size DC" double precision,
+    "System Size AC" double precision,
+    "Tilt" text,
+    "Azimuth" text,
+    "Mounting Method" text,
+    "Tracking" text,
+    "Customer Sector" text,
+    "App Received Date" text,
+    "App Complete Date" text,
+    "App Approved Date" text,
+    "Decommissioned Date" text,
+    "Self Installer" text,
+    "Installer Name" text,
+    "Installer Phone" text,
+    "Installer City" text,
+    "Installer State" text,
+    "Installer Zip" double precision,
+    "Third Party Owned" text,
+    "Third Party Owned Type" text,
+    "Third Party Name" text,
+    "Pace Financed" text,
+    "Pace Financier" text,
+    "Electric Vehicle" text,
+    "Electric Vehicle Count" double precision,
+    "System Output Monitoring" text,
+    "System Output Reports To Vendor?" text,
+    "System Output Monitoring Provider" text,
+    "Total System Cost" double precision,
+    "Itc Cost Basis" double precision,
+    "Application Status" text,
+    "Project is VNEM, NEM-V, NEM-Agg?" text,
+    "VNEM, NEM-V, NEM-Agg" text,
+    "Cost/Watt" double precision,
+    "Module Model 1" text,
+    "Module Manufacturer 1" text,
+    "Module Quantity 1" double precision,
+    "Module Model 2" text,
+    "Module Manufacturer 2" text,
+    "Module Quantity 2" double precision,
+    "Module Model 3" text,
+    "Module Manufacturer 3" text,
+    "Module Quantity 3" double precision,
+    "Module Model 4" text,
+    "Module Manufacturer 4" text,
+    "Module Quantity 4" double precision,
+    "Module Model 5" text,
+    "Module Manufacturer 5" text,
+    "Module Quantity 5" double precision,
+    "Module Model 6" text,
+    "Module Manufacturer 6" text,
+    "Module Quantity 6" double precision,
+    "Module Model 7" text,
+    "Module Manufacturer 7" text,
+    "Module Quantity 7" double precision,
+    "Module Model 8" text,
+    "Module Manufacturer 8" text,
+    "Module Quantity 8" double precision,
+    "Module Model 9" text,
+    "Module Manufacturer 9" text,
+    "Module Quantity 9" double precision,
+    "Module Model 10" text,
+    "Module Manufacturer 10" text,
+    "Module Quantity 10" double precision,
+    "Inverter Model 1" text,
+    "Inverter Manufacturer 1" text,
+    "Inverter Quantity 1" double precision,
+    "Inverter Model 2" text,
+    "Inverter Manufacturer 2" text,
+    "Inverter Quantity 2" double precision,
+    "Inverter Model 3" text,
+    "Inverter Manufacturer 3" text,
+    "Inverter Quantity 3" double precision,
+    "Inverter Model 4" text,
+    "Inverter Manufacturer 4" text,
+    "Inverter Quantity 4" double precision,
+    "Inverter Model 5" text,
+    "Inverter Manufacturer 5" text,
+    "Inverter Quantity 5" double precision,
+    "Inverter Model 6" text,
+    "Inverter Manufacturer 6" text,
+    "Inverter Quantity 6" double precision,
+    "Inverter Model 7" text,
+    "Inverter Manufacturer 7" text,
+    "Inverter Quantity 7" double precision,
+    "Inverter Model 8" text,
+    "Inverter Manufacturer 8" text,
+    "Inverter Quantity 8" double precision,
+    "Inverter Model 9" text,
+    "Inverter Manufacturer 9" text,
+    "Inverter Quantity 9" double precision
+);
+
+
+ALTER TABLE df_current_old OWNER TO acd;
+
+--
+-- Name: installer_map; Type: TABLE; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE installer_map (
+    gsc_installer text,
+    us_installer text,
+    tmp text
+);
+
+
+ALTER TABLE installer_map OWNER TO acd;
+
+--
+-- Name: inverter_map; Type: TABLE; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE inverter_map (
+    gsc_inverter text,
+    us_inverter text
+);
+
+
+ALTER TABLE inverter_map OWNER TO acd;
+
+--
+-- Name: gosolarview; Type: VIEW; Schema: public; Owner: acd
+--
+
+CREATE VIEW gosolarview AS
+ SELECT df_current."Application Id",
+    df_current."Preceding Id",
+    df_current."Superceding Id",
+    df_current."Matched CSI Application Number",
+    df_current."Utility",
+    df_current."Service City",
+    df_current."Service Zip",
+    df_current."Service County",
+    df_current."Technology Type",
+    df_current."System Size DC",
+    df_current."System Size AC",
+    df_current."Tilt",
+    df_current."Azimuth",
+    df_current."Mounting Method",
+    df_current."Tracking",
+    df_current."Customer Sector",
+    df_current."App Received Date",
+    df_current."App Complete Date",
+    df_current."App Approved Date",
+    df_current."Decommissioned Date",
+    df_current."Self Installer",
+    df_current."Installer Name",
+    df_current."Installer Phone",
+    df_current."Installer City",
+    df_current."Installer State",
+    df_current."Installer Zip",
+    df_current."Third Party Owned",
+    df_current."Third Party Owned Type",
+    df_current."Third Party Name",
+    df_current."Pace Financed",
+    df_current."Pace Financier",
+    df_current."Electric Vehicle",
+    df_current."Electric Vehicle Count",
+    df_current."System Output Monitoring",
+    df_current."System Output Reports To Vendor?",
+    df_current."System Output Monitoring Provider",
+    df_current."Total System Cost",
+    df_current."Itc Cost Basis",
+    df_current."Application Status",
+    df_current."Project is VNEM, NEM-V, NEM-Agg?",
+    df_current."VNEM, NEM-V, NEM-Agg",
+    df_current."Cost/Watt",
+    df_current."Module Model 1",
+    df_current."Module Manufacturer 1",
+    df_current."Module Quantity 1",
+    df_current."Module Model 2",
+    df_current."Module Manufacturer 2",
+    df_current."Module Quantity 2",
+    df_current."Module Model 3",
+    df_current."Module Manufacturer 3",
+    df_current."Module Quantity 3",
+    df_current."Module Model 4",
+    df_current."Module Manufacturer 4",
+    df_current."Module Quantity 4",
+    df_current."Module Model 5",
+    df_current."Module Manufacturer 5",
+    df_current."Module Quantity 5",
+    df_current."Module Model 6",
+    df_current."Module Manufacturer 6",
+    df_current."Module Quantity 6",
+    df_current."Module Model 7",
+    df_current."Module Manufacturer 7",
+    df_current."Module Quantity 7",
+    df_current."Module Model 8",
+    df_current."Module Manufacturer 8",
+    df_current."Module Quantity 8",
+    df_current."Module Model 9",
+    df_current."Module Manufacturer 9",
+    df_current."Module Quantity 9",
+    df_current."Module Model 10",
+    df_current."Module Manufacturer 10",
+    df_current."Module Quantity 10",
+    df_current."Inverter Model 1",
+    df_current."Inverter Manufacturer 1",
+    df_current."Inverter Quantity 1",
+    df_current."Inverter Model 2",
+    df_current."Inverter Manufacturer 2",
+    df_current."Inverter Quantity 2",
+    df_current."Inverter Model 3",
+    df_current."Inverter Manufacturer 3",
+    df_current."Inverter Quantity 3",
+    df_current."Inverter Model 4",
+    df_current."Inverter Manufacturer 4",
+    df_current."Inverter Quantity 4",
+    df_current."Inverter Model 5",
+    df_current."Inverter Manufacturer 5",
+    df_current."Inverter Quantity 5",
+    df_current."Inverter Model 6",
+    df_current."Inverter Manufacturer 6",
+    df_current."Inverter Quantity 6",
+    df_current."Inverter Model 7",
+    df_current."Inverter Manufacturer 7",
+    df_current."Inverter Quantity 7",
+    df_current."Inverter Model 8",
+    df_current."Inverter Manufacturer 8",
+    df_current."Inverter Quantity 8",
+    df_current."Inverter Model 9",
+    df_current."Inverter Manufacturer 9",
+    df_current."Inverter Quantity 9",
+    df_current.tmp,
+    df_current.year,
+    df_current.month,
+    df_current.my_date,
+    installer_map.gsc_installer,
+    installer_map.us_installer,
+    inverter_map.gsc_inverter,
+    inverter_map.us_inverter
+   FROM ((df_current
+     LEFT JOIN installer_map ON ((df_current."Installer Name" = installer_map.gsc_installer)))
+     LEFT JOIN inverter_map ON ((df_current."Inverter Manufacturer 1" = inverter_map.gsc_inverter)));
+
+
+ALTER TABLE gosolarview OWNER TO acd;
+
+--
+-- Name: trades.acd_trades; Type: TABLE; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE TABLE "trades.acd_trades" (
+    index bigint,
+    "Always_follow_fl" text,
+    "Domicile_country_cd" text,
+    "Incorporation_country_cd" text,
+    "Sedol_exchange" text,
+    "Shr_outstanding" double precision,
+    acct_category_cd text,
+    acct_status_cd text,
+    allocation_cd text,
+    bridge_currency_sec_id bigint,
+    bus_dte timestamp without time zone,
+    cost double precision,
+    create_ts timestamp without time zone,
+    create_uid text,
+    currency_sec_id bigint,
+    del_fl text,
+    descr text,
+    drill_pricing_logic_cd bigint,
+    foreign_fl text,
+    frac_dec_cd text,
+    get_market_data_fl text,
+    issuer text,
+    lstupd_ts timestamp without time zone,
+    lstupd_uid text,
+    managed_fl text,
+    manual_price_fl text,
+    margin_rate double precision,
+    min_trd_lot_size bigint,
+    mm_cd text,
+    mm_id bigint,
+    price_scale_fact double precision,
+    primary_exch text,
+    quantity double precision,
+    real_syn_fl text,
+    region_cd text,
+    registration_country_cd text,
+    restricted_fl text,
+    retired_fl text,
+    roundlot bigint,
+    sec_id bigint,
+    sec_status_cd text,
+    sec_sub_type text,
+    sec_type text,
+    short_sale_fl text,
+    sub_exchange text,
+    to_be_verified text,
+    trade_dte timestamp without time zone,
+    upload_ctrd_fl text,
+    upload_exec_fl text,
+    value double precision,
+    when_issue_fl text
+);
+
+
+ALTER TABLE "trades.acd_trades" OWNER TO acd;
+
+--
+-- Name: ix_df_current_Application Id; Type: INDEX; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE INDEX "ix_df_current_Application Id" ON df_current USING btree ("Application Id");
+
+
+--
+-- Name: ix_df_current_new_Application Id; Type: INDEX; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE INDEX "ix_df_current_new_Application Id" ON df_current_new USING btree ("Application Id");
+
+
+--
+-- Name: ix_df_current_old_Application Id; Type: INDEX; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE INDEX "ix_df_current_old_Application Id" ON df_current_old USING btree ("Application Id");
+
+
+--
+-- Name: ix_trades.acd_trades_index; Type: INDEX; Schema: public; Owner: acd; Tablespace: 
+--
+
+CREATE INDEX "ix_trades.acd_trades_index" ON "trades.acd_trades" USING btree (index);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: acd
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM acd;
+GRANT ALL ON SCHEMA public TO acd;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
